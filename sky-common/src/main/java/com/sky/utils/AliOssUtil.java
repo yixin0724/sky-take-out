@@ -22,9 +22,9 @@ public class AliOssUtil {
     /**
      * 文件上传
      *
-     * @param bytes
-     * @param objectName
-     * @return
+     * @param bytes 文件的字节流
+     * @param objectName 文件在OSS中的名称
+     * @return 文件上传后的访问URL
      */
     public String upload(byte[] bytes, String objectName) {
 
@@ -35,6 +35,7 @@ public class AliOssUtil {
             // 创建PutObject请求。
             ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(bytes));
         } catch (OSSException oe) {
+            // 处理OSS异常
             System.out.println("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
             System.out.println("Error Message:" + oe.getErrorMessage());
@@ -42,17 +43,19 @@ public class AliOssUtil {
             System.out.println("Request ID:" + oe.getRequestId());
             System.out.println("Host ID:" + oe.getHostId());
         } catch (ClientException ce) {
+            // 处理客户端异常
             System.out.println("Caught an ClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             System.out.println("Error Message:" + ce.getMessage());
         } finally {
+            // 关闭OSSClient
             if (ossClient != null) {
                 ossClient.shutdown();
             }
         }
 
-        //文件访问路径规则 https://BucketName.Endpoint/ObjectName
+        //构建文件访问路径 文件访问路径规则 https://BucketName.Endpoint/ObjectName
         StringBuilder stringBuilder = new StringBuilder("https://");
         stringBuilder
                 .append(bucketName)
@@ -63,6 +66,7 @@ public class AliOssUtil {
 
         log.info("文件上传到:{}", stringBuilder.toString());
 
+        // 返回文件访问URL
         return stringBuilder.toString();
     }
 }

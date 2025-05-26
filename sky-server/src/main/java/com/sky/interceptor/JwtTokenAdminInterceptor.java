@@ -25,11 +25,11 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     /**
      * 校验jwt
      *
-     * @param request
-     * @param response
-     * @param handler
-     * @return
-     * @throws Exception
+     * @param request  HTTP请求对象，用于获取请求头中的jwt令牌
+     * @param response HTTP响应对象，用于在jwt校验失败时设置401状态码
+     * @param handler  当前处理的处理器，用于判断是否为Controller的方法
+     * @return 如果jwt校验通过或当前请求不是Controller的方法，则返回true，否则返回false
+     * @throws Exception 如果jwt校验失败，可能抛出异常
      */
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //判断当前拦截到的是Controller的方法还是其他资源
@@ -44,7 +44,9 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         //2、校验令牌
         try {
             log.info("jwt校验:{}", token);
+            //解析jwt令牌，验证其有效性
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
+            //获取员工id，用于后续可能的日志记录或权限校验
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
             log.info("当前员工id：", empId);
             //3、通过，放行
