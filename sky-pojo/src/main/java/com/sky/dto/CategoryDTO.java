@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 当前端提交的数据和实体类中对应的属性差别比较大时，建议使用DTO来封装数据
+ */
 @Data
 public class CategoryDTO implements Serializable {
 

@@ -10,4 +10,5 @@ public class StatusConstant {
 
     //禁用
     public static final Integer DISABLE = 0;
+
 }
