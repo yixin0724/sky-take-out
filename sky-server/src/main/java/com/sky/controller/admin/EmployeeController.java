@@ -97,6 +97,7 @@ public class EmployeeController {
      * 员工分页查询
      * 注意：所有的分页查询都返回一个PageResult对象
      * 因为前端不是json的参数，因此不需要requestbody
+     * 查询类的操作，需要data数据，返回result时把泛型加上，非查询类，就不需要加泛型，只需要返回一个code就行
      * @param employeePageQueryDTO
      * @return
      */
@@ -106,5 +107,22 @@ public class EmployeeController {
         log.info("员工分页查询，参数为：{}",employeePageQueryDTO);
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 启用禁用员工账号
+     * 这里前端接口定义的时路径参数，因此需要用@PathVariable注解。
+     * status和上面的路径参数一致，就可以自动映射，不然还要在@PathVariable注解中指定参数名
+     * 但id不需要，因为他是通过地址栏传参，只需要保证这个参数名和前端接口定义的一样。
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用禁用员工账号")
+    public Result startOrStop(@PathVariable Integer status, Long id){
+        log.info("员工状态：{}，员工id：{}",status,id);
+        employeeService.startOrStop(status,id);
+        return Result.success();
     }
 }

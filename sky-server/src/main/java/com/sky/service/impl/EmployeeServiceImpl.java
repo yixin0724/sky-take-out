@@ -114,4 +114,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         //因为方法需要返回PageResult对象，所以这里需要把page对象转换成PageResult对象
         return new PageResult(page.getTotal(),page.getResult());
     }
+
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     */
+    public void startOrStop(Integer status, Long id) {
+        //update employee set status = ? where id = ?
+        //这里为了update的通用性，传入一个实体类对象
+        //编程风格1
+//        Employee employee = new Employee();
+//        employee.setStatus(status);
+//        employee.setId(id);
+        //编程风格2
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+        employeeMapper.update(employee);
+    }
 }

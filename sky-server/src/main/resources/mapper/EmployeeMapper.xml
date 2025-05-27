@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<!--    该xml映射文件在配置文件里需要配置才能被扫描到-->
+<!--该xml映射文件在配置文件里需要配置才能被扫描到-->
 <mapper namespace="com.sky.mapper.EmployeeMapper">
-<!--id对应的就是方法名称，返回值类型就是page的泛型类型，该泛型代表元素类型-->
+
+<!--员工分页查询的动态sql语句-->
+    <!--id对应的就是方法名称，返回值类型就是page的泛型类型，该泛型代表元素类型-->
     <select id="pageQuery" resultType="com.sky.entity.Employee">
         select * from employee
         <where>
@@ -13,4 +15,24 @@
         </where>
         order by create_time desc
     </select>
+
+<!--员工账号启用禁用的动态sql语句-->
+<!--这里parameterType可以直接用别名，省略包名，因为在配置文件里整体扫描了这个实体那个包，而对应的实体类就在被扫描的包中，因此就为所有实体都创建了别名-->
+    <update id="update" parameterType="Employee">
+        update employee
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="idNumber != null">id_Number = #{idNumber},</if>
+            <if test="updateTime != null">update_Time = #{updateTime},</if>
+            <if test="updateUser != null">update_User = #{updateUser},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+
 </mapper>

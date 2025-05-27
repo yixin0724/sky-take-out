@@ -36,4 +36,11 @@ public interface EmployeeMapper {
      * @return
      */
     Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 根据主键动态修改员工账号是否启用的属性
+     * 动态sql直接使用映射xml文件
+     * @param employee
+     */
+    void update(Employee employee);
 }
