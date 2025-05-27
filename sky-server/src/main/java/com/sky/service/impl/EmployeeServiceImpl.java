@@ -1,16 +1,20 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,4 +97,21 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.insert(employee);
     }
 
+    /**
+     * 员工分页查询
+     * 实现这个分页查询，最底层是基于数据库的limit关键字实现分页查询，并且分页查询DTO对象封装了分页查询的参数。
+     * 这里可以直接使用mybatis提供的pagehelper插件实现。
+     * 这个插件底层是基于ThreadLocal实现的，所以不需要传参
+     * @param employeePageQueryDTO
+     * @return
+     */
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        //select * from employee limit 0,10
+        //使用插件开始分页查询，这个插件会动态的拼接参数和计算总页数等，所以不需要再写limit关键字
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+        //插件这里规定返回的类型是Page<对应的实体类型>，这个类型指的就是元素类型
+        Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
+        //因为方法需要返回PageResult对象，所以这里需要把page对象转换成PageResult对象
+        return new PageResult(page.getTotal(),page.getResult());
+    }
 }

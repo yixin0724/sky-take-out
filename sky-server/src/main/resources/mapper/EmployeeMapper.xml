@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--    该xml映射文件在配置文件里需要配置才能被扫描到-->
 <mapper namespace="com.sky.mapper.EmployeeMapper">
+<!--id对应的就是方法名称，返回值类型就是page的泛型类型，该泛型代表元素类型-->
+    <select id="pageQuery" resultType="com.sky.entity.Employee">
+        select * from employee
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
 </mapper>

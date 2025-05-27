@@ -80,7 +80,7 @@
                 <version>${druid}</version>
             </dependency>
 
-            <!-- PageHelper Spring Boot Starter 依赖 -->
+            <!-- mybatis的分页查询插件 -->
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
                 <artifactId>pagehelper-spring-boot-starter</artifactId>
