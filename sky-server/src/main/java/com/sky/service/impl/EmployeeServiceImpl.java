@@ -122,7 +122,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     public void startOrStop(Integer status, Long id) {
         //update employee set status = ? where id = ?
-        //这里为了update的通用性，传入一个实体类对象
+        //这里为了update的通用性，传入一个实体类对象，只需要把需要更改的属性赋值给实体类对象
         //编程风格1
 //        Employee employee = new Employee();
 //        employee.setStatus(status);
@@ -132,6 +132,34 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .status(status)
                 .id(id)
                 .build();
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.getById(id);
+        //这里查出来是包含密码的，但不想让前端看到密码，所以这里把密码设置为****
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+    public void update(EmployeeDTO employeeDTO) {
+        //因为用了EmployeeDTO进行接收，但update需要Employee
+        //所以使用对象拷贝方法，把DTO对象拷贝到实体类对象中
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        //因为是修改操作，所以要设置更新时间、更新人id
+        employee.setUpdateTime(LocalDateTime.now());
+        //这个id在拦截器已经设置好了，所以直接get
+        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 }

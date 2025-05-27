@@ -125,4 +125,33 @@ public class EmployeeController {
         employeeService.startOrStop(status,id);
         return Result.success();
     }
+
+    /**
+     * 根据id查询员工信息
+     * 路径参数进行传参，因此需要用@PathVariable注解。
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询员工信息")
+    public Result<Employee> getById(@PathVariable Long id){
+        log.info("员工id：{}",id);
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    /**
+     * 编辑员工信息
+     * 非查询类操作，Result不需要加泛型
+     * json数据，因此需要用@RequestBody注解
+     * @param employeeDTO
+     * @return
+     */
+    @PutMapping
+    @ApiOperation("编辑员工信息")
+    public Result update(@RequestBody EmployeeDTO employeeDTO){
+        log.info("编辑员工信息：{}",employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
+    }
 }
