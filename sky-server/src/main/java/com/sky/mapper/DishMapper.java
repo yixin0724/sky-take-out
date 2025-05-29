@@ -8,6 +8,7 @@ public interface DishMapper {
 
     /**
      * 根据分类id查询菜品数量
+     * 根据id删除分类的方法需要使用该mapper方法
      * @param categoryId
      * @return
      */

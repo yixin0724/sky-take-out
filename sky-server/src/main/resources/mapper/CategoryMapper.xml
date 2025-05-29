@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.CategoryMapper">
 
+<!--分页查询对应的sql语句-->
     <select id="pageQuery" resultType="com.sky.entity.Category">
         select * from category
         <where>
@@ -16,6 +17,7 @@
         order by sort asc , create_time desc
     </select>
 
+<!--更新操作的通用语句-->
     <update id="update" parameterType="Category">
         update category
         <set>
@@ -41,6 +43,7 @@
         where id = #{id}
     </update>
 
+<!--根据类型查询员工信息，只查启用状态的员工-->
     <select id="list" resultType="Category">
         select * from category
         where status = 1

@@ -8,6 +8,7 @@ public interface SetmealMapper {
 
     /**
      * 根据分类id查询套餐的数量
+     * 根据id删除分类的方法需要使用该mapper方法
      * @param id
      * @return
      */
