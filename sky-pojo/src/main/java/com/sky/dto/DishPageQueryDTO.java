@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 菜品分页查询参数的DTO
+ */
 @Data
 public class DishPageQueryDTO implements Serializable {
 
