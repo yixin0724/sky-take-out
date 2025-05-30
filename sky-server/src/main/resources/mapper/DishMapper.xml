@@ -10,7 +10,7 @@
         values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
     </insert>
 
-<!--分页查询的语句，注意为category.name起别名，因为category.name和dish.name重复了。保证字段和属性名一样，才能自动映射-->
+    <!--分页查询的语句，注意为category.name起别名，因为category.name和dish.name重复了。保证字段和属性名一样，才能自动映射-->
     <select id="pageQuery" resultType="com.sky.vo.DishVO">
         select d.* , c.name as categoryName from dish d left outer join category c on d.category_id = c.id
         <where>
@@ -26,4 +26,13 @@
         </where>
         order by d.create_time desc
     </select>
+
+<!--根据菜品id集合批量删除菜品数据-->
+    <delete id="deleteBatch">
+        delete from dish where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>

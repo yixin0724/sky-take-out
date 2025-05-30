@@ -2,12 +2,16 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -32,6 +36,8 @@ public class DishServiceImpl implements DishService {
     private DishMapper dishMapper;
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
 
     /**
      * 新增菜品对应的口味数据
@@ -72,5 +78,43 @@ public class DishServiceImpl implements DishService {
         //分页查询返回的结果类是helper下的Page，泛型为了适应接口用的是DishVO，
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
+    }
+
+    /**
+     * 批量删除菜品
+     * 因为删除菜品涉及的业务规则比较多，所以先分析其中的规则，再写代码
+     * 涉及多个表操作，别忘了事务注解
+     * @param ids
+     */
+    @Transactional
+    public void deleteBatch(List<Long> ids) {
+        //判断菜品是否在售
+        //先把id取出来，然后遍历，判断菜品是否在售，如果菜品在售，则不能删除
+        for (Long id : ids) {
+            Dish dish = dishMapper.getById(id);
+            if (dish.getStatus() == StatusConstant.ENABLE) {
+                //如果菜品在售，则不能删除，抛出自定义异常
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+            }
+        }
+        //因为菜品和套餐是多对多的关系，所以要判断菜品是否关联了套餐，它们中间有个中间表，所以要查询中间表，判断菜品是否关联了套餐
+        List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
+        if (setmealIds != null && setmealIds.size() > 0) {
+            //如果菜品关联了套餐，则不能删除，抛出自定义异常
+            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        }
+//        //删除菜品表中的菜品数据，注意优化，如果删除一个菜品是一个sql语句，则sql数量多了可能会影响性能
+//        for (Long id : ids) {
+//            dishMapper.deleteById(id);
+//            //删除菜品关联的口味数据，不用查询是否存在，直接删
+//            dishFlavorMapper.deleteByDishId(id);
+//        }
+        //优化后，根据菜品id集合，批量删除菜品表中的菜品数据
+        //sql: delete from dish where id in (?,?,?)
+        dishMapper.deleteBatch(ids);
+
+        //优化后，根据菜品id集合，批量删除菜品关联的口味数据
+        //sql: delete from dish_flavor where dish_id in (?,?,?)
+        dishFlavorMapper.deleteByDishIds(ids);
     }
 }
