@@ -5,6 +5,7 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,5 +67,19 @@ public class DishController {
         log.info("批量删除菜品：{}", ids);
         dishService.deleteBatch(ids);
         return Result.success();
+    }
+
+    /**
+     * 根据id查询菜品
+     * 因为该接口返回数据需要data，所以需要写泛型，并且data中有个其他表字段，因此用使用新的VO类
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询菜品")
+    public Result<DishVO> getById(@PathVariable Long id){
+        log.info("根据id查询菜品：{}", id);
+        DishVO dishVO = dishService.getByIdWithFlavors(id);
+        return Result.success(dishVO);
     }
 }
