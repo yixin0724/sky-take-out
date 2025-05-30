@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 分类管理
+ * @author yixin
+ * @date 2025/5/27
+ * @description 分类相关功能接口
  */
 @RestController
 @RequestMapping("/admin/category")

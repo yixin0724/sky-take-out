@@ -86,12 +86,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         //设置默认密码，进行md5加密后存到数据库
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
 
-        //设置创建时间、更新时间、创建人id、更新人id
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        //使用封装后的ThreadLocal获取当前登录用户的id
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+        //已经通过AutoFillAspect切面类添加了公共字段自动填充功能，这里就不用添加了
+//        //设置创建时间、更新时间、创建人id、更新人id
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
+//        //使用封装后的ThreadLocal获取当前登录用户的id，并进行赋值
+//        employee.setCreateUser(BaseContext.getCurrentId());
+//        employee.setUpdateUser(BaseContext.getCurrentId());
 
         //使用持久层mapper的insert方法，把实体类对象插入到数据库中
         employeeMapper.insert(employee);
@@ -156,10 +157,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         //所以使用对象拷贝方法，把DTO对象拷贝到实体类对象中
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
-        //因为是修改操作，所以要设置更新时间、更新人id
-        employee.setUpdateTime(LocalDateTime.now());
-        //这个id在拦截器已经设置好了，所以直接get
-        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        //已经通过AutoFillAspect切面类添加了公共字段自动填充功能，这里就不用添加了
+//        //因为是修改操作，所以要设置更新时间、更新人id
+//        employee.setUpdateTime(LocalDateTime.now());
+//        //这个id在拦截器已经设置好了，所以直接get
+//        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 }

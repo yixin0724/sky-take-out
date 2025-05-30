@@ -63,11 +63,12 @@ public class CategoryServiceImpl implements CategoryService {
         //分类状态默认为禁用状态0，设置默认为禁用是防止新添加的分类没有菜单。
         category.setStatus(StatusConstant.DISABLE);
 
+        //已经通过AutoFillAspect切面类添加了公共字段自动填充功能，这里就不用添加了
         //涉及数据的修改操作，新增的操作，对应就设置创建时间、修改时间、创建人、修改人
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
-        category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateUser(BaseContext.getCurrentId());
+//        category.setCreateTime(LocalDateTime.now());
+//        category.setUpdateTime(LocalDateTime.now());
+//        category.setCreateUser(BaseContext.getCurrentId());
+//        category.setUpdateUser(BaseContext.getCurrentId());
 
         //调用mapper层进行插入
         categoryMapper.insert(category);
@@ -119,9 +120,10 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO,category);
 
-        //因为是修改操作，需要设置修改时间、修改人
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
+        ////已经通过AutoFillAspect切面类添加了公共字段填充功能，这里就不用添加了
+//        //因为是修改操作，需要设置修改时间、修改人
+//        category.setUpdateTime(LocalDateTime.now());
+//        category.setUpdateUser(BaseContext.getCurrentId());
 
         categoryMapper.update(category);
     }
@@ -136,8 +138,9 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = Category.builder()
                 .id(id)
                 .status(status)
-                .updateTime(LocalDateTime.now())
-                .updateUser(BaseContext.getCurrentId())
+                //已经通过AutoFillAspect切面类添加了公共字段填充功能，这里就不用添加了
+//                .updateTime(LocalDateTime.now())
+//                .updateUser(BaseContext.getCurrentId())
                 .build();
         categoryMapper.update(category);
     }
