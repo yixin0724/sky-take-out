@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 @Slf4j
 public class AliOssUtil {
 
+    //对应配置文件中的属性
     private String endpoint;
     private String accessKeyId;
     private String accessKeySecret;
@@ -21,7 +22,6 @@ public class AliOssUtil {
 
     /**
      * 文件上传
-     *
      * @param bytes 文件的字节流
      * @param objectName 文件在OSS中的名称
      * @return 文件上传后的访问URL
@@ -56,6 +56,7 @@ public class AliOssUtil {
         }
 
         //构建文件访问路径 文件访问路径规则 https://BucketName.Endpoint/ObjectName
+        //拼起来的字符串就是文件的url
         StringBuilder stringBuilder = new StringBuilder("https://");
         stringBuilder
                 .append(bucketName)

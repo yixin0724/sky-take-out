@@ -7,3 +7,7 @@ sky:
     database: sky_take_out
     username: root
     password: he020724
+  alioss:
+    #阿里云oss配置
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    bucket-name: sky-take-out
