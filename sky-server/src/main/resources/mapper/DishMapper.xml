@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.DishMapper">
+
+<!--插入语句，字段和属性要对应好-->
+<!--这里因为dishId前端是没有的，需要从sql语句中获取，因此使用useGeneratedKeys把指返回出去，使用keyProperty选择要返回的属性，与实体类的名称一致-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into dish (name, category_id, price, image, description, create_time, update_time, create_user,update_user, status)
+        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+    </insert>
+</mapper>

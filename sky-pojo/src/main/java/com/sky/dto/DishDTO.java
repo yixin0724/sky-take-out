@@ -23,7 +23,7 @@ public class DishDTO implements Serializable {
     private String description;
     //0 停售 1 起售
     private Integer status;
-    //口味
+    //口味，因为菜品口味flavor里有很多菜品口味，所以用list集合保存，这里面属性又是DishFlavor实体类的属性，所以用DishFlavor接收
     private List<DishFlavor> flavors = new ArrayList<>();
 
 }
