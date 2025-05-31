@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author yixin
  * @date 2025/5/31
@@ -50,5 +52,21 @@ public class SetmealController {
         log.info("分页查询：{}",setmealPageQueryDTO);
         PageResult pageResult = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageResult);
+    }
+
+
+    /**
+     * 批量删除套餐
+     * 前端使用url拼接的查询参数传递，名称为ids，如果是多个待删除的套餐id，中间用逗号隔开。
+     * 因此用@RequestParam注解，该注解会自动将参数值转为List<Long>
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @ApiOperation("批量删除套餐")
+    public Result delete(@RequestParam List<Long> ids){
+        log.info("批量删除套餐：{}", ids);
+        setmealService.deleteBatch(ids);
+        return Result.success();
     }
 }
