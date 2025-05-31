@@ -11,7 +11,7 @@
                 #{createUser}, #{updateUser})
     </insert>
 
-<!--套餐的分页查询-->
+    <!--套餐的分页查询-->
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         select
         s.*,c.name categoryName
@@ -34,5 +34,21 @@
         </where>
         order by s.create_time desc
     </select>
+
+    <!--根据套餐id套餐的信息-->
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+        </set>
+        where id = #{id}
+    </update>
 
 </mapper>
