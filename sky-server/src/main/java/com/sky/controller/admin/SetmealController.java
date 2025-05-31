@@ -84,6 +84,7 @@ public class SetmealController {
     public Result<SetmealVO> getById(@PathVariable Long id) {
         log.info("根据id查询套餐：{}", id);
         //查询套餐的同时也要查询套餐关联的餐品
+        //这些组合数据需要一个专门的对象来承载并返回给前端，因此使用了SetmealVO。
         SetmealVO setmealVO = setmealService.getByIdWithDish(id);
         return Result.success(setmealVO);
     }
