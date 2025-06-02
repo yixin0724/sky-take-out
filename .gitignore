@@ -5,3 +5,5 @@
 *Test.java
 **/test/
 *.yml
+application.yml
+application-dev.yml
