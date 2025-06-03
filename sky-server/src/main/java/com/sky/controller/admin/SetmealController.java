@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class SetmealController {
      */
     @PostMapping
     @ApiOperation("新增套餐")
+    @CacheEvict(cacheNames = "setmealCache", key = "#setmealDTO.categoryId")
     public Result save(@RequestBody SetmealDTO setmealDTO) {
         log.info("新增套餐：{}", setmealDTO);
         //新增的不止是套餐还有套餐相关联的餐品
@@ -58,7 +60,6 @@ public class SetmealController {
         return Result.success(pageResult);
     }
 
-
     /**
      * 批量删除套餐
      * 前端使用url拼接的查询参数传递，名称为ids，如果是多个待删除的套餐id，中间用逗号隔开。
@@ -69,6 +70,7 @@ public class SetmealController {
      */
     @DeleteMapping
     @ApiOperation("批量删除套餐")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true) //因为不好计算出精确要删除的缓存，直接全删
     public Result delete(@RequestParam List<Long> ids) {
         log.info("批量删除套餐：{}", ids);
         setmealService.deleteBatch(ids);
@@ -76,7 +78,8 @@ public class SetmealController {
     }
 
     /**
-     * 根据id查询套餐，用于修改页面回显数据
+     * 根据套餐id查询套餐，用于修改页面回显数据
+     *
      * @param id
      * @return
      */
@@ -98,6 +101,7 @@ public class SetmealController {
      */
     @PutMapping
     @ApiOperation("修改套餐")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         setmealService.update(setmealDTO);
         return Result.success();
@@ -105,12 +109,14 @@ public class SetmealController {
 
     /**
      * 套餐起售停售
+     *
      * @param status
      * @param id
      * @return
      */
     @PostMapping("/status/{status}")
     @ApiOperation("套餐起售停售")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result startOrStop(@PathVariable Integer status, Long id) {
         setmealService.startOrStop(status, id);
         return Result.success();
