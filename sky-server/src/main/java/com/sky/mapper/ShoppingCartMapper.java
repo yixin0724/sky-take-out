@@ -16,7 +16,8 @@ import java.util.List;
 public interface ShoppingCartMapper {
 
     /**
-     * 动态条件查询，根据菜品id或者套餐id查询相对应的数据
+     * 动态条件查询
+     * 如根据菜品id或者套餐id查询相对应的数据
      * @param shoppingCart
      * @return
      */
