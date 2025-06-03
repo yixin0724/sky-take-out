@@ -90,4 +90,41 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         shoppingCart.setUserId(BaseContext.getCurrentId());
         return shoppingCartMapper.list(shoppingCart);
     }
+
+    /**
+     * 清空购物车
+     */
+    public void clean() {
+        shoppingCartMapper.delete(BaseContext.getCurrentId());
+    }
+
+    /**
+     * 删除购物车中一个商品
+     *
+     * @param shoppingCartDTO
+     */
+    public void sub(ShoppingCartDTO shoppingCartDTO) {
+        //delete from shopping_cart where user_id = ? and dish_id/setmeal_id = ?
+        //设置查询条件，查询当前用户待删除的购物车数据
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+        //判断当前购物车中是否存在当前要删除的菜品或套餐
+        if(list != null && list.size() > 0){
+            //因为只会有一条数据，直接取出第一条就是当前待删除购物车的数据
+            shoppingCart = list.get(0);
+            //获取商品份数
+            Integer number = shoppingCart.getNumber();
+            //判断当前数据中商品份数是否为1
+            if(number == 1){
+                //当前商品在购物车中的份数为1，直接删除当前记录
+                shoppingCartMapper.deleteById(shoppingCart.getId());
+            }else {
+                //当前商品在购物车中的份数不为1，修改份数即可
+                shoppingCart.setNumber(shoppingCart.getNumber() - 1);
+                shoppingCartMapper.updateNumberById(shoppingCart);
+            }
+        }
+    }
 }
