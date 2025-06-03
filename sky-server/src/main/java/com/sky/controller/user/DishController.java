@@ -31,6 +31,7 @@ public class DishController {
     @Autowired
     private RedisTemplate redisTemplate;
 
+
     /**
      * 根据分类id查询菜品
      * 使用redis一定要注意数据一致性
