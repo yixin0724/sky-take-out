@@ -44,11 +44,11 @@ public interface ShoppingCartMapper {
      * @param currentId
      */
     @Delete("delete from shopping_cart where user_id = #{currentId}")
-    void delete(Long currentId);
+    void deleteByUserId(Long currentId);
 
     /**
      * 根据购车数据id删除购物车数据
      */
     @Delete("delete from shopping_cart where id = #{id}")
-    void deleteById(Long id);
+    void deleteByShoppingCartId(Long id);
 }

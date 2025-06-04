@@ -95,7 +95,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      * 清空购物车
      */
     public void clean() {
-        shoppingCartMapper.delete(BaseContext.getCurrentId());
+        shoppingCartMapper.deleteByUserId(BaseContext.getCurrentId());
     }
 
     /**
@@ -119,7 +119,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             //判断当前数据中商品份数是否为1
             if(number == 1){
                 //当前商品在购物车中的份数为1，直接删除当前记录
-                shoppingCartMapper.deleteById(shoppingCart.getId());
+                shoppingCartMapper.deleteByShoppingCartId(shoppingCart.getId());
             }else {
                 //当前商品在购物车中的份数不为1，修改份数即可
                 shoppingCart.setNumber(shoppingCart.getNumber() - 1);
