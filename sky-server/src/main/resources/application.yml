@@ -44,9 +44,25 @@ sky:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    # 微信用户的jwt令牌配置
+    user-secret-key: itheima
+    user-ttl: 7200000
+    user-token-name: authentication
   #阿里云oss配置，主环境尽量用引用，不要直接写死
   alioss:
     endpoint: ${sky.alioss.endpoint}
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+  # 微信小程序相关配置
+  wechat:
+    appid: ${sky.wechat.appid}
+    secret: ${sky.wechat.secret}
+    #微信
+    mchid: ${sky.wechat.mchid}
+    mchSerialNo: ${sky.wechat.mchSerialNo}
+    privateKeyFilePath: ${sky.wechat.privateKeyFilePath}
+    apiV3Key: ${sky.wechat.apiV3Key}
+    weChatPayCertFilePath: ${sky.wechat.weChatPayCertFilePath}
+    notifyUrl: ${sky.wechat.notifyUrl}
+    refundNotifyUrl: ${sky.wechat.refundNotifyUrl}
