@@ -125,13 +125,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 订单支付
+     * 订单支付，微信支付版本
      *
      * @param ordersPaymentDTO
      * @return
      */
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
-        // 当前登录用户id
+        //当前登录用户id
         Long userId = BaseContext.getCurrentId();
         User user = userMapper.getById(userId);
 
@@ -142,14 +142,13 @@ public class OrderServiceImpl implements OrderService {
                 "苍穹外卖订单", //商品描述
                 user.getOpenid() //微信用户的openid
         );
-
+        //判断支付结果
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
             throw new OrderBusinessException("该订单已支付");
         }
-
+        //封装VO对象并返回
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
-
         return vo;
     }
 
@@ -159,13 +158,13 @@ public class OrderServiceImpl implements OrderService {
      * @param outTradeNo
      */
     public void paySuccess(String outTradeNo) {
-        // 当前登录用户id
+        //当前登录用户id
         Long userId = BaseContext.getCurrentId();
 
-        // 根据订单号查询当前用户的订单
+        //根据订单号查询当前用户的订单
         Orders ordersDB = orderMapper.getByNumberAndUserId(outTradeNo, userId);
 
-        // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
+        //根据订单id更新订单的状态、支付方式、支付状态、结账时间
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
                 .status(Orders.TO_BE_CONFIRMED)
@@ -554,4 +553,5 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException("超出配送范围");
         }
     }
+
 }
