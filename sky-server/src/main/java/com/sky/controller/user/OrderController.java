@@ -83,11 +83,31 @@ public class OrderController {
         return Result.success(orderVO);
     }
 
+    /**
+     * 取消订单
+     * @param id 订单id
+     * @return
+     * @throws Exception
+     */
     @PutMapping("/cancel/{id}")
     @ApiOperation("取消订单")
     public Result cancel(@PathVariable("id") Long id) throws Exception{
         log.info("取消订单：{}", id);
         orderService.userCancelById(id);
+        return Result.success();
+    }
+
+    /**
+     * 再来一单
+     * 前端已经对再来一单绑定了清空购物车的请求
+     * @param id
+     * @return
+     */
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repetition(@PathVariable Long id){
+        log.info("再来一单：{}", id);
+        orderService.repetition(id);
         return Result.success();
     }
 }

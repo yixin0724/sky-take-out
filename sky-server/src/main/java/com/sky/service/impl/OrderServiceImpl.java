@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author yixin
@@ -225,7 +226,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 用户取消订单
-     * @param id
+     * @param id 订单id
      */
     public void userCancelById(Long id) throws Exception {
         //1.先根据id获取当前订单信息
@@ -260,5 +261,33 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelReason("用户取消");
         orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
+    }
+
+    /**
+     * 再来一单
+     * 再来一单就是将原订单中的商品重新加入到购物车中
+     * @param id
+     */
+    public void repetition(Long id) {
+        //1.查询当前用户id
+        Long userId = BaseContext.getCurrentId();
+        //2.根据订单id查询当前订单详情
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        //3.将订单详情对象转换为购物车对象
+        //使用.stream() 将 orderDetailList 转换为流（Stream），以便进行链式处理
+        //.map(x -> { ... }) 对流中的每一个 OrderDetail 元素进行映射操作，将其转换为一个新的ShoppingCart对象
+        //使用 Collectors.toList() 将经过映射后的 ShoppingCart 对象收集进一个新的列表 shoppingCartList 中。
+        List<ShoppingCart> shoppingCartList = orderDetailList.stream().map(x -> {
+            //每次读取一条菜品或套餐数据，就将它封装到一个购物车对象中，然后将对象添加到集合中
+            ShoppingCart shoppingCart = new ShoppingCart();
+            //将原订单详情里面的菜品的非id属性，重新复制到购物车对象中
+            BeanUtils.copyProperties(x, shoppingCart, "id");
+            //检查没有设置的属性
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).collect(Collectors.toList());
+        //4.将购物车对象批量添加到数据库
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }
