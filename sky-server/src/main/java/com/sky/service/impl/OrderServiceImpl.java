@@ -201,4 +201,25 @@ public class OrderServiceImpl implements OrderService {
         //4.把封装好的list集合放到PageResult中，并返回
         return new PageResult(page.getTotal(), orderVOList);
     }
+
+    /**
+     * 根据订单id查询订单详情
+     * @param id
+     * @return
+     */
+    public OrderVO orderDetails(Long id) {
+        //接口文档描述可知，需要订单表的信息和订单明细表信息
+        //1.根据订单id查询订单信息
+        Orders orders = orderMapper.getById(id);
+        //2.根据订单id查询订单包含的菜品明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+        //3.把前端所需的数据放到orderVO中
+        OrderVO orderVO = new OrderVO();
+        //先将查询的订单信息拷贝到VO类中
+        BeanUtils.copyProperties(orders, orderVO);
+        //再将查询到的订单中菜品信息封装到VO类中
+        orderVO.setOrderDetailList(orderDetailList);
+        //4.返回VO类
+        return orderVO;
+    }
 }
