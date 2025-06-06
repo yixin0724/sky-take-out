@@ -66,3 +66,7 @@ sky:
     weChatPayCertFilePath: ${sky.wechat.weChatPayCertFilePath}
     notifyUrl: ${sky.wechat.notifyUrl}
     refundNotifyUrl: ${sky.wechat.refundNotifyUrl}
+  shop:
+    address: 长沙市雨花区新建西路9号
+  baidu:
+    ak: 4mu2UkhYmkCAvHTIAM7btIrEnlbn7R5J

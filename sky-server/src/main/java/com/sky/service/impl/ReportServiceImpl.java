@@ -1,10 +1,12 @@
 package com.sky.service.impl;
 
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author yixin
@@ -180,5 +183,32 @@ public class ReportServiceImpl implements ReportService {
         map.put("end", end);
         map.put("status", status);
         return orderMapper.countByMap(map);
+    }
+
+    /**
+     * 统计销量top10
+     * 查询两张表orderDetail(查名字和份数)和order表(用于查状态)
+     * select od.name,sum(od.number) number from order_detail od ,orders o
+     * where od.order_id = o.id and o.order_time > ? and o.order_time < ? and o.status = 5 group by od.name order by sum(od.number) desc limit 0,10
+     * @param begin
+     * @param end
+     * @return
+     */
+    public SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end){
+        //LocalDate转LocalDateTime，并构造一天内的时间
+        LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
+        LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
+        //sql语句查出来只有name和number，需要创建一个实体类接收，这里使用GoodsSalesDTO接收
+        List<GoodsSalesDTO> goodsSalesDTOList = orderMapper.getSalesTop10(beginTime, endTime);
+        //由出参VO类需要的数据可知，使用stream流，将goodsSalesDTOList集合中的name和number分别拼接成字符串，并使用StringUtils.join方法拼接成字符串
+        List<String> names = goodsSalesDTOList.stream().map(GoodsSalesDTO::getName).collect(Collectors.toList());
+        String nameList = StringUtils.join(names,",");
+        List<Integer> numbers = goodsSalesDTOList.stream().map(GoodsSalesDTO::getNumber).collect(Collectors.toList());
+        String numberList = StringUtils.join(numbers,",");
+        //创建一个VO类，将名称列表和销售的份量列表的数据封装到VO类中
+        return SalesTop10ReportVO.builder()
+                .nameList(nameList)
+                .numberList(numberList)
+                .build();
     }
 }
