@@ -79,8 +79,10 @@ public class OrderServiceImpl implements OrderService {
         if (addressBook == null) {
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
+        log.info("准备检查位置是否合理，用户地址：{}", addressBook);
         //检查用户的收获地址是否超出配送范围
-//        checkOutOfRange(addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
+        checkOutOfRange(addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
+        log.info("调用百度地图API，检测结果为：位置合理");
         //处理购物车数据为空，先获取用户id，并构造一个购物车对象，然后调用mapper根据id查购物车数据
         Long userId = BaseContext.getCurrentId();
         ShoppingCart shoppingCart = ShoppingCart.builder()
