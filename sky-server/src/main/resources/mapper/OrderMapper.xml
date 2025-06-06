@@ -12,7 +12,7 @@
                 #{payStatus}, #{amount}, #{remark}, #{phone}, #{address}, #{consignee},
                 #{estimatedDeliveryTime}, #{deliveryStatus}, #{packAmount}, #{tablewareNumber}, #{tablewareStatus})
     </insert>
-
+<!--动态条件更新字段-->
     <update id="update" parameterType="com.sky.entity.Orders">
         update orders
         <set>
@@ -43,7 +43,6 @@
         </set>
         where id = #{id}
     </update>
-
 <!--分页条件查询-->
     <select id="pageQuery" resultType="Orders">
         select * from orders
@@ -68,5 +67,20 @@
             </if>
         </where>
         order by order_time desc
+    </select>
+<!--根据动态条件统计营业额数据-->
+    <select id="sumByMap" resultType="java.lang.Double">
+        select sum(amount) from orders
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="begin != null">
+                and order_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                and order_time &lt;= #{end}
+            </if>
+        </where>
     </select>
 </mapper>
