@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 
 /**
@@ -83,5 +84,16 @@ public class ReportController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
         log.info("菜品或套餐TOP10统计，开始日期：{}，结束日期：{}", begin, end);
         return Result.success(reportService.getSalesTop10(begin,end));
+    }
+
+    /**
+     * 导出运营数据报表
+     * 因为这个功能需要将表格下载到客户端，需要一个输出流，输出流通过HttpServletResponse获取，所以在参数中定义一个HttpServletResponse
+     * @param response
+     */
+    @GetMapping("/export")
+    @ApiOperation("导出运营数据报表")
+    public void export(HttpServletResponse response){
+        reportService.exportBusinessData(response);
     }
 }
