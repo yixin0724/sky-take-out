@@ -48,12 +48,32 @@ public class OrderController {
      * @param ordersPaymentDTO 订单支付参数
      * @return Result<OrderPaymentVO>
      */
+//    @PutMapping("/payment")
+//    @ApiOperation("订单支付")
+//    public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+//        log.info("订单支付：{}", ordersPaymentDTO);
+//        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
+//        log.info("生成预支付交易单：{}", orderPaymentVO);
+//        return Result.success(orderPaymentVO);
+//    }
+
+    /**
+     * 订单支付，简易版本
+     * @param ordersPaymentDTO
+     * @return
+     */
     @PutMapping("/payment")
     @ApiOperation("订单支付")
-    public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
-        log.info("订单支付：{}", ordersPaymentDTO);
-        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
-        log.info("生成预支付交易单：{}", orderPaymentVO);
+    public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) {
+        log.info("订单支付......");
+        orderService.easyPay(ordersPaymentDTO);
+        // 直接手动封装一个vo对象返回
+        OrderPaymentVO orderPaymentVO = new OrderPaymentVO();
+        orderPaymentVO.setNonceStr("pay success");
+        orderPaymentVO.setSignType("wechat");
+        orderPaymentVO.setPaySign("null");
+        orderPaymentVO.setTimeStamp(String.valueOf(LocalDateTime.now()));
+        orderPaymentVO.setPackageStr("pay success");
         return Result.success(orderPaymentVO);
     }
 

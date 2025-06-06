@@ -80,8 +80,7 @@ public class OrderServiceImpl implements OrderService {
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
         //检查用户的收获地址是否超出配送范围
-        checkOutOfRange(addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
-
+//        checkOutOfRange(addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
         //处理购物车数据为空，先获取用户id，并构造一个购物车对象，然后调用mapper根据id查购物车数据
         Long userId = BaseContext.getCurrentId();
         ShoppingCart shoppingCart = ShoppingCart.builder()
@@ -142,7 +141,7 @@ public class OrderServiceImpl implements OrderService {
         JSONObject jsonObject = weChatPayUtil.pay(
                 ordersPaymentDTO.getOrderNumber(), //商户订单号
                 new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
+                "智化云厨订单", //商品描述
                 user.getOpenid() //微信用户的openid
         );
         //判断支付结果
@@ -153,6 +152,45 @@ public class OrderServiceImpl implements OrderService {
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
         return vo;
+    }
+
+    /**
+     * 无法完成微信支付的简易支付方法
+     * @param ordersPaymentDTO
+     */
+    public void easyPay(OrdersPaymentDTO ordersPaymentDTO) {
+        log.info("简易支付");
+        // 获得用户id
+        Long userId = BaseContext.getCurrentId();
+        // 获取订单号
+        String orderNumber = ordersPaymentDTO.getOrderNumber();
+        // 根据用户id和订单号查询订单
+        Orders orders = orderMapper.getByNumberAndUserId(orderNumber, userId);
+        // 判断支付状态是否是待付款
+        if (!orders.getPayStatus().equals(Orders.UN_PAID)) {
+            // 不是待付款订单，无法进行支付，抛出异常
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        // 订单没有异常，修改其状态
+        // 修改支付状态为已付款
+        orders.setPayStatus(Orders.PAID);
+        // 修改订单状态为待接单
+        orders.setStatus(Orders.TO_BE_CONFIRMED);
+        // 在数据库中修改
+        orderMapper.update(orders);
+
+        // 支付成功后，第一时间通知外卖商家（来单提醒）
+        // 通过WebSocket实现服务端向客户端推送消息（无需请求，直接通信，这就是WebSocket的优势之一）
+        // 客户端解析服务端推送的消息，判断是来单提送还是客户催单，并进行相应的消息提示和语音播报
+        // 前后端约定，服务端发送的数据格式为json，字段包括：type、orderId、content
+        // type为消息类型：1.来单提醒     2.客户催单
+        // orderId为订单id；content为消息内容
+        Map<Object, Object> map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + orderNumber);
+        // 通过WebSocket实现来单提醒，向客户端浏览器推送消息
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 
     /**
@@ -265,12 +303,12 @@ public class OrderServiceImpl implements OrderService {
         orders.setId(ordersDB.getId());
         //若是待接单状态下，需要退款
         if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
-            //调用微信支付退款接口
-            weChatPayUtil.refund(
-                    ordersDB.getNumber(), //商户订单号
-                    ordersDB.getNumber(), //商户退款单号
-                    new BigDecimal(0.01),//退款金额，单位 元
-                    new BigDecimal(0.01));//原订单金额
+            //调用微信支付退款接口，这里为简单模拟，不进行实际退款
+//            weChatPayUtil.refund(
+//                    ordersDB.getNumber(), //商户订单号
+//                    ordersDB.getNumber(), //商户退款单号
+//                    new BigDecimal(0.01),//退款金额，单位 元
+//                    new BigDecimal(0.01));//原订单金额
             //支付状态修改为 退款
             orders.setPayStatus(Orders.REFUND);
         }
@@ -425,13 +463,13 @@ public class OrderServiceImpl implements OrderService {
         //获取支付状态
         Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == Orders.PAID) {
-            //用户已支付，需要退款
-            String refund = weChatPayUtil.refund(
-                    ordersDB.getNumber(),
-                    ordersDB.getNumber(),
-                    new BigDecimal(0.01),
-                    new BigDecimal(0.01));
-            log.info("申请退款：{}", refund);
+            //用户已支付，需要退款，这里进行模拟，不用实际退款
+//            String refund = weChatPayUtil.refund(
+//                    ordersDB.getNumber(),
+//                    ordersDB.getNumber(),
+//                    new BigDecimal(0.01),
+//                    new BigDecimal(0.01));
+//            log.info("申请退款：{}", refund);
         }
         //4.拒单需要退款，根据订单id更新订单状态、拒单原因、取消时间
         Orders orders = new Orders();
@@ -456,13 +494,13 @@ public class OrderServiceImpl implements OrderService {
         //2.获取支付状态，若为已支付，则调用微信支付退款接口
         Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == Orders.PAID) {
-            //用户已支付，需要退款
-            String refund = weChatPayUtil.refund(
-                    ordersDB.getNumber(),
-                    ordersDB.getNumber(),
-                    new BigDecimal(0.01),
-                    new BigDecimal(0.01));
-            log.info("申请退款：{}", refund);
+            //用户已支付，需要退款，这里进行模拟，不用实际退款
+//            String refund = weChatPayUtil.refund(
+//                    ordersDB.getNumber(),
+//                    ordersDB.getNumber(),
+//                    new BigDecimal(0.01),
+//                    new BigDecimal(0.01));
+//            log.info("申请退款：{}", refund);
         }
         //3.管理端取消订单需要退款，根据订单id更新订单状态、取消原因、取消时间
         Orders orders = new Orders();

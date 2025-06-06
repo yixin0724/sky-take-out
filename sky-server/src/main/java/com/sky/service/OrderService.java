@@ -111,4 +111,10 @@ public interface OrderService {
      * @param id
      */
     void reminder(Long id);
+
+    /**
+     * 订单支付
+     * @param ordersPaymentDTO
+     */
+    void easyPay(OrdersPaymentDTO ordersPaymentDTO);
 }
