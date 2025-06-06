@@ -2,8 +2,10 @@ package com.sky.service.impl;
 
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
+import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.TurnoverReportVO;
+import com.sky.vo.UserReportVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ import java.util.Map;
 public class ReportServiceImpl implements ReportService {
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 统计时间区间内的营业额
@@ -67,5 +71,51 @@ public class ReportServiceImpl implements ReportService {
         return reportVO;
     }
 
+    /**
+     * 根据时间区间统计用户数量
+     * @param begin
+     * @param end
+     * @return
+     */
+    public UserReportVO getUserStatistics(LocalDate begin, LocalDate end){
+        //1.先计算日期列表dateList，将时间区间内的每一天加进去
+        List<LocalDate> dateList = new ArrayList<>();
+        for (LocalDate date = begin; !date.isAfter(end); date = date.plusDays(1)) {
+            dateList.add(date);
+        }
+        //2.再计算新增用户列表newUserList，以及总用户列表totalUserList
+        List<Integer> newUserList = new ArrayList<>(); //新增用户数
+        List<Integer> totalUserList = new ArrayList<>(); //总用户数
+        //获取指定时间区间内的用户数量
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+            //用一个动态sql兼容这两个sql即可
+            //新增用户数量 select count(id) from user where create_time > ? and create_time < ?
+            Integer newUser = getUserCount(beginTime, endTime);
+            //总用户数量 select count(id) from user where  create_time < ?
+            Integer totalUser = getUserCount(null, endTime);
+            newUserList.add(newUser);
+            totalUserList.add(totalUser);
+        }
+        //3.将VO需要的两个属性数据封装为VO类
+        return UserReportVO.builder()
+                .dateList(StringUtils.join(dateList,","))
+                .newUserList(StringUtils.join(newUserList,","))
+                .totalUserList(StringUtils.join(totalUserList,","))
+                .build();
+    }
 
+    /**
+     * 私有方法，将共有的内容提取为方法，根据时间区间统计用户数量
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    private Integer getUserCount(LocalDateTime beginTime, LocalDateTime endTime) {
+        Map map = new HashMap();
+        map.put("begin",beginTime);
+        map.put("end", endTime);
+        return userMapper.countByMap(map);
+    }
 }
