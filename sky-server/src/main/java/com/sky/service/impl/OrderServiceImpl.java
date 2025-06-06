@@ -22,6 +22,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     /**
      * 用户下单，订单提交
@@ -153,18 +156,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 支付成功，修改订单状态
+     * 支付成功，修改订单状态，并进行来单提醒
      *
      * @param outTradeNo
      */
     public void paySuccess(String outTradeNo) {
-        //当前登录用户id
+        //1.获取当前登录用户id
         Long userId = BaseContext.getCurrentId();
-
-        //根据订单号查询当前用户的订单
+        //2.根据订单号查询当前用户的订单
         Orders ordersDB = orderMapper.getByNumberAndUserId(outTradeNo, userId);
-
-        //根据订单id更新订单的状态、支付方式、支付状态、结账时间
+        //3.根据订单id更新订单的状态、支付方式、支付状态、结账时间
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
                 .status(Orders.TO_BE_CONFIRMED)
@@ -172,6 +173,13 @@ public class OrderServiceImpl implements OrderService {
                 .checkoutTime(LocalDateTime.now())
                 .build();
         orderMapper.update(orders);
+        //4.通过websocket向前端发送推送消息
+        Map map = new HashMap();
+        map.put("type", 1);//消息类型，1表示来单提醒
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + outTradeNo);  //具体提示内容
+        //通过WebSocket实现来单提醒，向客户端浏览器推送消息
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 
     /**
@@ -348,6 +356,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 私有方法，为getOrderVOList方法提供，根据订单id获取菜品信息字符串
+     *
      * @param orders
      * @return
      */
@@ -365,6 +374,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 统计各个状态的订单数量
+     *
      * @return
      */
     public OrderStatisticsVO statistics() {
@@ -400,14 +410,15 @@ public class OrderServiceImpl implements OrderService {
      * - 只有订单处于“待接单”状态时可以执行拒单操作
      * - 商家拒单时需要指定拒单原因
      * - 商家拒单时，如果用户已经完成了支付，需要为用户退款
+     *
      * @param ordersRejectionDTO
      * @throws Exception
      */
-    public void rejection(OrdersRejectionDTO ordersRejectionDTO) throws Exception{
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) throws Exception {
         //1.先查询订单
         Orders ordersDB = orderMapper.getById(ordersRejectionDTO.getId());
         //2.只有订单处于“待接单”状态时，也就是状态2，才可以执行拒单操作
-        if (!ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)){
+        if (!ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
         //3.若为已支付，则调用微信支付退款接口
@@ -435,10 +446,11 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 取消订单
      * 和拒单基本一致，少个判断是否为待接单状态
+     *
      * @param ordersCancelDTO
      * @throws Exception
      */
-    public void cancel(OrdersCancelDTO ordersCancelDTO) throws Exception{
+    public void cancel(OrdersCancelDTO ordersCancelDTO) throws Exception {
         //1.根据id查询订单
         Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
         //2.获取支付状态，若为已支付，则调用微信支付退款接口
@@ -463,6 +475,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 派送订单
+     *
      * @param id
      */
     public void delivery(Long id) {
@@ -482,6 +495,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 完成订单
+     *
      * @param id
      */
     public void complete(Long id) {
@@ -502,18 +516,19 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 检查客户的收货地址是否超出配送范围
+     *
      * @param address
      */
     private void checkOutOfRange(String address) {
         //初始化地图API请求参数
         Map map = new HashMap();
-        map.put("address",shopAddress);
-        map.put("output","json");
-        map.put("ak",ak);
+        map.put("address", shopAddress);
+        map.put("output", "json");
+        map.put("ak", ak);
         //获取店铺的经纬度坐标
         String shopCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3", map);
         JSONObject jsonObject = JSON.parseObject(shopCoordinate);
-        if(!jsonObject.getString("status").equals("0")){
+        if (!jsonObject.getString("status").equals("0")) {
             throw new OrderBusinessException("店铺地址解析失败");
         }
         //数据解析
@@ -522,11 +537,11 @@ public class OrderServiceImpl implements OrderService {
         String lng = location.getString("lng");
         //店铺经纬度坐标
         String shopLngLat = lat + "," + lng;
-        map.put("address",address);
+        map.put("address", address);
         //获取用户收货地址的经纬度坐标
         String userCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3", map);
         jsonObject = JSON.parseObject(userCoordinate);
-        if(!jsonObject.getString("status").equals("0")){
+        if (!jsonObject.getString("status").equals("0")) {
             throw new OrderBusinessException("收货地址解析失败");
         }
         //数据解析
@@ -535,20 +550,20 @@ public class OrderServiceImpl implements OrderService {
         lng = location.getString("lng");
         //用户收货地址经纬度坐标
         String userLngLat = lat + "," + lng;
-        map.put("origin",shopLngLat);
-        map.put("destination",userLngLat);
-        map.put("steps_info","0");
+        map.put("origin", shopLngLat);
+        map.put("destination", userLngLat);
+        map.put("steps_info", "0");
         //路线规划
         String json = HttpClientUtil.doGet("https://api.map.baidu.com/directionlite/v1/driving", map);
         jsonObject = JSON.parseObject(json);
-        if(!jsonObject.getString("status").equals("0")){
+        if (!jsonObject.getString("status").equals("0")) {
             throw new OrderBusinessException("配送路线规划失败");
         }
         //数据解析
         JSONObject result = jsonObject.getJSONObject("result");
         JSONArray jsonArray = (JSONArray) result.get("routes");
         Integer distance = (Integer) ((JSONObject) jsonArray.get(0)).get("distance");
-        if(distance > 5000){
+        if (distance > 5000) {
             //配送距离超过5000米
             throw new OrderBusinessException("超出配送范围");
         }
