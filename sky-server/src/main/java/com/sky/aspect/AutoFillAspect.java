@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  * @date 2025/5/30
  * @description 自定义的切面类，实现自动填充公共字段机制
  */
-@Aspect
+@Aspect //标识该类为切面类
 @Component  // 表明该类是一个组件，交给spring来管理
 @Slf4j
 public class AutoFillAspect {
